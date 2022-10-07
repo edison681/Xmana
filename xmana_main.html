@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="https://fonts.googleapis.com/css?family=Work Sans" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <script src="wallet_sandbox.js"></script>
+    <script src="nft_sandbox.js"></script>
+    <script src="https://unpkg.com/xrpl@2.2.3"></script>
+    <script>
+      function opentab(evt, tabname, color) {
+  // Declare all variables
+  var i, tabcontent, tablinks;
+  // Get all elements with class="tabcontent" and hide them
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  // Get all elements with class="tablinks" and remove the class "active"
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].style.backgroundColor = "";
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+  // Show the current tab, and add an "active" class to the button that opened the tab
+  document.getElementById(tabname).style.display = "block";
+  // Add the specific color to the button used to open the tab content
+  evt.style.backgroundColor = color;
+  evt.currentTarget.className += " active";
+// Get the element with id="defaultOpen" and click on it
+// document.getElementById("defaultOpen").click();
+
+}
+    </script>
+    <script>
+      if (typeof module !== "undefined") {
+        const xrpl = require('xrpl')
+      }
+    </script>
+    
+    <title>Xmana Prototype</title>
+  </head>
+  
+<!-- <body> -->
+<!-- Tab links -->
+<div class="tab">
+  <button class="tablinks" onclick="opentab(event, 'Wallet','darkseagreen')" id="defaultOpen">Wallet_Test</button>
+  <button class="tablinks" onclick="opentab(event, 'NFT', 'LightSeaGreen')">NFT_Test</button>
+</div>
+
+<!-- Tab content -->
+<div id="Wallet" class="tabcontent">
+<!-- <body> -->
+    <h1>Token Test Harness</h1>
+    <form id="theForm_Wallet">
+      Choose your ledger instance:  
+      <input type="radio" id="xls" name="server"
+        value="wss://xls20-sandbox.rippletest.net:51233" checked>
+      <label for="xls20">XLS20-NFT</label>
+      &nbsp;&nbsp;
+      <input type="radio" id="tn" name="server"
+        value="wss://s.altnet.rippletest.net:51233">
+      <label for="testnet">Testnet</label>
+      &nbsp;&nbsp;
+      <input type="radio" id="dn" name="server"
+        value="wss://s.devnet.rippletest.net:51233">
+      <label for="devnet">Devnet</label>
+      <br/><br/>
+      <button type="button" onClick="getAccountsFromSeeds()">Get Accounts From Seeds</button>
+      <br/>
+      <textarea id="seeds" cols="40" rows= "2"></textarea>
+      <br/><br/>
+      <table>
+        <tr valign="top">
+          <td>
+            <table>
+              <tr valign="top">
+                <td>
+                <td>
+                  <button type="button" onClick="getAccount('standby')">Get New Standby Account</button>
+                  <table>
+                    <tr valign="top">
+                      <td align="right">
+                        Standby Account
+                      </td>
+                      <td>
+                        <input type="text" id="standbyAccountField" size="40"></input>
+                        <br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align="right">
+                        Public Key
+                      </td>
+                      <td>
+                        <input type="text" id="standbyPubKeyField" size="40"></input>
+                        <br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align="right">
+                        Private Key
+                      </td>
+                      <td>
+                        <input type="text" id="standbyPrivKeyField" size="40"></input>
+                        <br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align="right">
+                        Seed
+                      </td>
+                      <td>
+                        <input type="text" id="standbySeedField" size="40"></input>
+                        <br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align="right">
+                        XRP Balance
+                      </td>
+                      <td>
+                        <input type="text" id="standbyBalanceField" size="40"></input>
+                        <br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align="right">
+                        Amount
+                      </td>
+                      <td>
+                        <input type="text" id="standbyAmountField" size="40"></input>
+                        <br>
+                      </td>
+                    </tr>
+                   <tr>
+                      <td align="right">
+                        Destination
+                      </td>
+                      <td>
+                        <input type="text" id="standbyDestinationField" size="40"></input>
+                        <br>
+                      </td>
+                    </tr>
+                  </table>
+                  <p align="right">
+                    <textarea id="standbyResultField" cols="80" rows="20" ></textarea>
+                  </p>
+                </td>
+                </td>
+                <td>
+                  <table>
+                    <tr valign="top">
+                      <td align="center" valign="top">
+                        <button type="button" onClick="sendXRP()">Send XRP&#62;</button>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td>
+            <table>
+              <tr>
+                <td>
+                  <table>
+                    <tr>
+                      <td align="center" valign="top">
+                        <button type="button" onClick="oPsendXRP()">&#60;Send XRP</button>
+                        </td>
+                        <td align="right">
+                          <button type="button" onClick="getAccount('operational')">Get New Operational Account</button>
+                        <table>
+                          <tr valign="top">
+                            <td align="right">
+                              Operational Account
+                            </td>
+                            <td>
+                              <input type="text" id="operationalAccountField" size="40"></input>
+                              <br>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td align="right">
+                              Public Key
+                            </td>
+                            <td>
+                              <input type="text" id="operationalPubKeyField" size="40"></input>
+                              <br>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td align="right">
+                              Private Key
+                            </td>
+                            <td>
+                              <input type="text" id="operationalPrivKeyField" size="40"></input>
+                              <br>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td align="right">
+                              Seed
+                            </td>
+                            <td>
+                              <input type="text" id="operationalSeedField" size="40"></input>
+                              <br>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td align="right">
+                              XRP Balance
+                            </td>
+                            <td>
+                              <input type="text" id="operationalBalanceField" size="40"></input>
+                              <br>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td align="right">
+                              Amount
+                            </td>
+                            <td>
+                              <input type="text" id="operationalAmountField" size="40"></input>
+                              <br>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td align="right">
+                              Destination
+                            </td>
+                            <td>
+                              <input type="text" id="operationalDestinationField" size="40"></input>
+                              <br>
+                            </td>
+                          </tr>
+                        </table>
+                        <p align="right">
+                          <textarea id="operationalResultField" cols="80" rows="20" ></textarea>
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </form>
+  <!-- </body> -->
+</div>
+
+<div id="NFT" class="tabcontent">
+  <!-- <body> -->
+    <h1>NFToken Tester</h1>
+    <form id="theForm_NFT">
+      <p>
+        <button
+          type="button"
+          onClick="mintToken()">
+          Mint Token</button
+        >&nbsp;&nbsp;
+        <button
+          type="button"
+          onClick="getTokens()">
+          Get Tokens</button
+        >&nbsp;&nbsp;
+        <button
+          type="button"
+          onClick="burnToken()">
+          Burn Token</button
+        >&nbsp;&nbsp;
+      </p>
+      <p>
+        <button
+          type="button"
+          onClick="createSellOffer()">
+          Create Sell Offer</button
+        >&nbsp;&nbsp;
+        <button
+          type="button"
+          onClick="createBuyOffer()">
+          Create Buy Offer</button
+        >&nbsp;&nbsp;
+        <button
+          type="button"
+          onClick="getOffers()">
+          Get Offers
+        </button>
+      </p>
+      <p>
+        <button
+          type="button"
+          onClick="acceptSellOffer()">
+          Accept Sell Offer</button
+        >&nbsp;&nbsp;
+        <button
+          type="button"
+          onClick="acceptBuyOffer()">
+          Accept Buy Offer</button
+        >&nbsp;&nbsp;
+        <button
+          type="button"
+          onClick="cancelOffer()">
+          Cancel Offer</button
+        >&nbsp;&nbsp;
+      </p>
+      <table>
+        <tr>
+          <td align="right">Account</td>
+          <td>
+            <input
+              type="text"
+              id="account"
+              value=""
+              size="40" />
+          </td>
+        </tr>
+        <tr>
+          <td align="right">Secret</td>
+          <td>
+            <input
+              type="text"
+              id="secret"
+              value=""
+              size="40" />
+          </td>
+        </tr>
+        <tr>
+          <td align="right">Token URL</td>
+          <td>
+            <input
+              type="text"
+              id="tokenUrl"
+              value="ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf4dfuylqabf3oclgtqy55fbzdi"
+              size="80" />
+          </td>
+        </tr>
+        <tr>
+          <td align="right">Flags</td>
+          <td>
+            <input
+              type="text"
+              id="flags"
+              value="1"
+              size="10" />
+          </td>
+        </tr>
+        <tr>
+          <td align="right">Token ID</td>
+          <td>
+            <input
+              type="text"
+              id="tokenId"
+              value=""
+              size="80" />
+          </td>
+        </tr>
+        <tr>
+          <td align="right">Amount</td>
+          <td>
+            <input
+              type="text"
+              id="amount"
+              value="1000000"
+              size="20" />
+          </td>
+        </tr>
+        <tr>
+          <td align="right">Token Offer Index</td>
+          <td>
+            <input
+              type="text"
+              id="tokenOfferIndex"
+              value=""
+              size="80" />
+          </td>
+        </tr>
+        <tr>
+          <td align="right">Owner</td>
+          <td>
+            <input
+              type="text"
+              id="owner"
+              value=""
+              size="80" />
+          </td>
+        </tr>
+      </table>
+    </form>
+  <!-- </body> -->
+</div>
+<script>
+  document.getElementById("defaultOpen").click();
+</script>  
+  <!-- </body> -->
+</html>
