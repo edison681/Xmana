@@ -4,6 +4,7 @@
 // * For concept demonstration only, final product/code will need to modify the XRPL library directly *
 // * Be transformed to the needs of Xmana platform - high volume, low value, staking mechanism, multiple *
 // * Beneficiaries which are not known by the time when escrow was created, etc. *
+
 const xmana_smart_dist_adr = "rnuvEZ8yyNNe8j4wk9rfhdzrKv5AdvW2gk";
 const xmana_smart_dist_seed = "sEd7ZKS7g1kMxs1afu9txCZ2NLAGQkD";
 const xmana_smart_dist_wallet = xrpl.Wallet.fromSeed(xmana_smart_dist_seed);
@@ -14,6 +15,60 @@ class Smart_Escrow {
     this.wallet = wallet;
     this.staked_amount = staked_amount;
   }
+// *******************************************************
+// ************ Xmana Smart Distribution Bot *************
+// *******************************************************
+// A centralized automated wallet account is not needed when a escrow is modified to directly handle such function
+        
+// xmaNFT_smtArr = nft_id+"@"+staking_address+"#"+staking_side+"$"+token_amount
+  static xmana_smart_dist_bot(xmaNFT_id, xmaNFT_smtDict){
+    var total_vouch
+    var total_beat
+    var xmaNFT_smtArr = xmaNFT_smtDict[xmaNFT_id];      
+        for (let i = 0; i < xmaNFT_smtArr.length; i++) {
+            if (xmaNFT_smtArr[i].slice(xmaNFT_smtArr[i].indexOf('#') + 1, xmaNFT_smtArr[i].lastIndexOf('$')) = "VouchIt") { 
+                total_vouch = total_vouch + parsefloat(xmaNFT_smtArr[i].slice(xmaNFT_smtArr[i].indexOf('$') + 1)) }
+            else if (xmaNFT_smtArr[i].slice(xmaNFT_smtArr[i].indexOf('#') + 1,xmaNFT_smtArr[i].lastIndexOf('$')) = "BeatIt") {
+                total_beat = total_beat + parsefloat(xmaNFT_smtArr[i].slice(xmaNFT_smtArr[i].indexOf('$') + 1))
+                }
+        }
+        //connect xmana_smart_dist_wallet to make distribution
+          const client = new xrpl.Client(server_address)
+          client.connect()
+        //loop to distribute the tokens
+        for (let i = 0; i < xmaNFT_smtArr.length; i++) { 
+        // total_beat side won, will receive total_vouch side tokens based on stake weight
+            if (total_vouch / total_beat < xmana_nft_stake_threshold) {
+                if (xmaNFT_smtArr[i].slice(xmaNFT_smtArr[i].indexOf('#') + 1, xmaNFT_smtArr[i].lastIndexOf('$')) = "BeatIt") {
+                   var temp_recAdr = xmaNFT_smtArr[i].slice(xmaNFT_smtArr[i].indexOf('@') + 1, xmaNFT_smtArr[i].lastIndexOf('#'))
+                   var temp_distAmt = total_vouch * (parsefloat(xmaNFT_smtArr[i].slice(xmaNFT_smtArr[i].indexOf('$') + 1)) / total_beat)}
+                }
+        // total_vouch side won, will receive total_beat side tokens based on stake weight        
+           else if (total_beat / total_vouch < xmana_nft_stake_threshold) {
+                if (xmaNFT_smtArr[i].slice(xmaNFT_smtArr[i].indexOf('#') + 1, xmaNFT_smtArr[i].lastIndexOf('$')) = "VouchIt") {
+                                var temp_recAdr = xmaNFT_smtArr[i].slice(xmaNFT_smtArr[i].indexOf('@') + 1, xmaNFT_smtArr[i].lastIndexOf('#'))
+                                var temp_distAmt = total_beat * (parsefloat(xmaNFT_smtArr[i].slice(xmaNFT_smtArr[i].indexOf('$') + 1)) / total_vouch)
+                        }
+                }
+        // inconclusive staking result, all tokens will go back to original wallet                
+           else {
+                   var temp_recAdr = xmaNFT_smtArr[i].slice(xmaNFT_smtArr[i].indexOf('@') + 1, xmaNFT_smtArr[i].lastIndexOf('#'))
+                   var temp_distAmt = parsefloat(xmaNFT_smtArr[i].slice(xmaNFT_smtArr[i].indexOf('$') + 1))
+                 }
+        // Prepare transaction
+           const prepared = client.autofill({
+                "TransactionType": "Payment",
+                "Account": xmana_smart_dist_wallet.address,
+                "Amount": temp_distAmt,
+                "Destination": temp_recAdr})
+        // ------------------------------------------------ Sign prepared instructions
+           const signed = xmana_smart_dist_wallet.sign(prepared)
+        // -------------------------------------------------------- Submit signed blob
+           const tx = client.submitAndWait(signed.tx_blob)
+         }
+        client.disconnect()    
+  }
+        
   // *******************************************************
   // ************* Create Escrow ***************************
   // *******************************************************
@@ -160,63 +215,5 @@ class Smart_Escrow {
       "Fulfillment:",
       myFulfillment.serializeBinary().toString("hex").toUpperCase()
     );
-  }
-  // *******************************************************
-  // ************ Xmana Smart Distribution Bot *************
-  // *******************************************************
-        
-// xmaNFT_smtArr = nft_id+"@"+staking_address+"#"+staking_side+"$"+token_amount
-  static xmana_smart_dist_bot(xmaNFT_smtArr){
-    var total_vouch
-    var total_beat
-        for (let i = 0; i < xmaNFT_smtArr.length; i++) {
-            if (xmaNFT_smtArr[i].slice(xmaNFT_smtArr[i].indexOf('#') + 1, xmaNFT_smtArr[i].lastIndexOf('$')) = "VouchIt") { 
-                total_vouch = total_vouch + parsefloat(xmaNFT_smtArr[i].slice(xmaNFT_smtArr[i].indexOf('$') + 1)) }
-            else if (xmaNFT_smtArr[i].slice(xmaNFT_smtArr[i].indexOf('#') + 1,xmaNFT_smtArr[i].lastIndexOf('$')) = "BeatIt") {
-                total_beat = total_beat + parsefloat(xmaNFT_smtArr[i].slice(xmaNFT_smtArr[i].indexOf('$') + 1))
-                }
-        }
-        //connect xmana_smart_dist_wallet to make distribution
-          const client = new xrpl.Client(server_address)
-          client.connect()
-        //loop to distribute the tokens
-        for (let i = 0; i < xmaNFT_smtArr.length; i++) { 
-        // total_beat side won, will receive total_vouch side tokens based on stake weight
-                if (total_vouch / total_beat < xmana_nft_stake_threshold) {
-                        if (xmaNFT_smtArr[i].slice(xmaNFT_smtArr[i].indexOf('#') + 1, xmaNFT_smtArr[i].lastIndexOf('$')) = "BeatIt") {
-                                var temp_recAdr = xmaNFT_smtArr[i].slice(xmaNFT_smtArr[i].indexOf('@') + 1, xmaNFT_smtArr[i].lastIndexOf('#'))
-                                var temp_distAmt = total_vouch * (parsefloat(xmaNFT_smtArr[i].slice(xmaNFT_smtArr[i].indexOf('$') + 1)) / total_beat)
-                        }
-                }
-                // total_vouch side won, will receive total_beat side tokens based on stake weight        
-                else if (total_beat / total_vouch < xmana_nft_stake_threshold) {
-                        if (xmaNFT_smtArr[i].slice(xmaNFT_smtArr[i].indexOf('#') + 1, xmaNFT_smtArr[i].lastIndexOf('$')) = "VouchIt") {
-                                var temp_recAdr = xmaNFT_smtArr[i].slice(xmaNFT_smtArr[i].indexOf('@') + 1, xmaNFT_smtArr[i].lastIndexOf('#'))
-                                var temp_distAmt = total_beat * (parsefloat(xmaNFT_smtArr[i].slice(xmaNFT_smtArr[i].indexOf('$') + 1)) / total_vouch)
-                        }
-                }
-        // inconclusive staking result, all tokens will go back to original wallet                
-                else {
-
-
-
-                        
-                 }
-        // Prepare transaction
-          const prepared = client.autofill({
-          "TransactionType": "Payment",
-          "Account": xmana_smart_dist_wallet.address,
-          "Amount": temp_distAmt,
-          "Destination": temp_recAdr
-        })
-      
-        // ------------------------------------------------ Sign prepared instructions
-        const signed = standby_wallet.sign(prepared)
-      
-        // -------------------------------------------------------- Submit signed blob
-        const tx = await client.submitAndWait(signed.tx_blob)
-         }
-        
-          
   }
 }

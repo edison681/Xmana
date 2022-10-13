@@ -1,13 +1,13 @@
-// xmana_nft_smart_array = nft_id+"@"+staking_address+"#"+staking_side+"$"+token_amount
-var xmana_nfts_smart_array = [];
+// xmaNFT_smtArr = nft_id+"@"+staking_address+"#"+staking_side+"$"+token_amount
+const server_address = "wss://xls20-sandbox.rippletest.net:51233";
+var xmaNFT_smtDict = {};
 
 //***************************
 //** Mint Token *************
 //***************************
 
-const server_address = "wss://xls20-sandbox.rippletest.net:51233";
-
 async function mintToken() {
+  var xmaNFT_smtArr = [];
   const staked_token = 10;
   const wallet = xrpl.Wallet.fromSeed(secret.value);
   const client = new xrpl.Client(server_address);
@@ -36,7 +36,7 @@ async function mintToken() {
     // Submit signed blob --------------------------------------------------------
     const tx = await client.submitAndWait(transactionBlob, { wallet });
 
-    xmana_nfts_smart_array.push(
+    xmaNFT_smtArr.push(
       tx.NFTokenID.value +
         "@" +
         wallet.classicAddress +
@@ -44,6 +44,7 @@ async function mintToken() {
         "VouchIt" +
         staked_token.toString
     );
+    xmaNFT_smtDict[tx.NFTokenID.value] = xmaNFT_smtArr;
 
     const nfts = await client.request({
       method: "account_nfts",
