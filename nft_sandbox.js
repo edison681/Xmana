@@ -6,7 +6,6 @@ var xmaNFT_smtDict = {};
 //***************************
 //** Mint Token *************
 //***************************
-
 async function mintToken() {
   var xmaNFT_smtArr = [];
   const staked_token = 10;
@@ -65,7 +64,7 @@ async function mintToken() {
 //***************************
 //** Get Tokens *************
 //***************************
-
+//Display all NFTs of the address/account
 async function getTokens() {
   const wallet = xrpl.Wallet.fromSeed(secret.value);
   const client = new xrpl.Client(server_address);
@@ -82,7 +81,7 @@ async function getTokens() {
 //***************************
 //** Burn Token *************
 //***************************
-
+//Burn a NFT token by token ID of the address/account
 async function burnToken() {
   const wallet = xrpl.Wallet.fromSeed(secret.value);
   const client = new xrpl.Client(server_address);
@@ -136,6 +135,7 @@ async function createSellOffer() {
 
   const tx = await client.submitAndWait(transactionBlob, { wallet }); //AndWait
 
+  //Display all sell offers of a NFT by token ID
   console.log("***Sell Offers***");
   let nftSellOffers;
   try {
@@ -147,6 +147,8 @@ async function createSellOffer() {
     console.log("No sell offers.");
   }
   console.log(JSON.stringify(nftSellOffers, null, 2));
+
+  //Display all buy offers of a NFT by token ID
   console.log("***Buy Offers***");
   let nftBuyOffers;
   try {
@@ -171,10 +173,10 @@ async function createSellOffer() {
   client.disconnect();
   // End of createSellOffer()
 }
+
 //********************************
 //** Create Buy Offer ***********
 //********************************
-
 async function createBuyOffer() {
   const wallet = xrpl.Wallet.fromSeed(secret.value);
   const client = new xrpl.Client(server_address);
@@ -182,6 +184,7 @@ async function createBuyOffer() {
   console.log("Connected to Sandbox");
 
   // Prepare transaction -------------------------------------------------------
+  // With "Owner: owner.value" specified, means it's a buy offer
   const transactionBlob = {
     TransactionType: "NFTokenCreateOffer",
     Account: wallet.classicAddress,
@@ -193,7 +196,7 @@ async function createBuyOffer() {
 
   // Submit signed blob --------------------------------------------------------
   const tx = await client.submitAndWait(transactionBlob, { wallet });
-
+  // Display sell offers of the NFT by token ID
   console.log("***Sell Offers***");
   let nftSellOffers;
   try {
@@ -205,6 +208,7 @@ async function createBuyOffer() {
     console.log("No sell offers.");
   }
   console.log(JSON.stringify(nftSellOffers, null, 2));
+  // Display buy offers of the NFT by token ID
   console.log("***Buy Offers***");
   let nftBuyOffers;
   try {
@@ -233,7 +237,7 @@ async function createBuyOffer() {
 //***************************
 //** Cancel Offer ***********
 //***************************
-
+//For both buy and sell offers by tokenOfferIndex/ID
 async function cancelOffer() {
   const wallet = xrpl.Wallet.fromSeed(secret.value);
   const client = new xrpl.Client(server_address);
@@ -264,6 +268,7 @@ async function cancelOffer() {
     console.log("No sell offers.");
   }
   console.log(JSON.stringify(nftSellOffers, null, 2));
+
   console.log("***Buy Offers***");
   let nftBuyOffers;
   try {
@@ -277,7 +282,6 @@ async function cancelOffer() {
   console.log(JSON.stringify(nftBuyOffers, null, 2));
 
   // Check transaction results -------------------------------------------------
-
   console.log(
     "Transaction result:",
     JSON.stringify(tx.result.meta.TransactionResult, null, 2)
@@ -286,10 +290,10 @@ async function cancelOffer() {
     "Balance changes:",
     JSON.stringify(xrpl.getBalanceChanges(tx.result.meta), null, 2)
   );
-
   client.disconnect();
   // End of cancelOffer()
 }
+
 //***************************
 //** Get Offers *************
 //***************************

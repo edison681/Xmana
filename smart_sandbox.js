@@ -21,15 +21,21 @@ function xmana_smart_nft_staking(xmaNFT_id, xmaNFT_smtDict, staking_side, stakin
         client.connect()
         console.log("Connected to Sandbox");
 
-        Smart_Escrow.createEscrow(staking_wallet, staking_amount);
-
+        //check balance that wallet has enough tokens to stake
+        if (client.getXrpBalance(staking_wallet.address) < staking_amount + 20) {
+                console.log("Not enough tokens to stake the amount");
+                return;
+        } else {
+                Smart_Escrow.createEscrow(staking_wallet, staking_amount);
+        }
         client.disconnect()
 
         xmaNFT_smtDict[xmaNFT_id].push(
                 tostring(xmaNFT_id) +
                 "@" +
                 tostring(staking_wallet.classicAddress) +
-                "#" + tostring(staking_side) +
+                "#" +
+                tostring(staking_side) +
                 "$" +
                 tostring(staking_amount));
 
